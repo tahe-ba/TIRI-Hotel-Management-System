@@ -2,12 +2,19 @@
 
 from .room import Room
 
+
 class Hotel:
     def __init__(self, name):
         self.name = name
         self.capacity = 0
         self.rooms = []
         self.clients = []
+
+    def get_room_by_number(self, room_number):
+        for room in self.rooms:
+            if room.room_number == room_number:
+                return room
+        return None
 
     def get_first_roomnumber(self):
         if len(self.rooms) == 0:
@@ -26,11 +33,10 @@ class Hotel:
             self.rooms.append(room)
             self.capacity += 1
         print(str(room_numbers)+" Rooms added" + " of type " +
-              room_type + " with price " + str(prices))
+              room_type + " with price " + str(prices)+" TND/night")
 
     def add_room(self, room_type, price):
         room_type_str = "single" if room_type == 0 else "double"
-        last_room_number = self.rooms[-1].room_number+1 if len(self.rooms) > 0 else 0
         room = Room(self.get_last_roomnumber()+1, room_type, price, 1)
         self.rooms.append(room)
         print("Room number "+str(room.room_number)+" added of type " +
@@ -50,7 +56,8 @@ class Hotel:
 
     def get_hotel_info(self):
         print("Hotel name: " + self.name)
-        print("Hotel capacity: " + str(self.capacity))
+        print("Hotel capacity: ", str(self.get_occupancy()) +
+              "/"+str(self.capacity))
 
         print("\nHotel clients ("+str(len(self.clients))+") :")
         if len(self.clients) == 0:
@@ -82,7 +89,7 @@ class Hotel:
             if room.client != None:
                 print("Room client name: " + room.client.name)
             print("----------------------------")
-    
+
     def check_in(self, room_number, client):
         if client.room != None:
             print("Client " + str(client.cin) +
@@ -100,8 +107,15 @@ class Hotel:
                     self.clients.append(client)
                     print("Checked in " + str(client.cin) +
                           " to room " + str(room.room_number))
-                    return
-        print("Room " + str(room.room_number) + " is not available")
+                    return 0
+            else:
+                if room.room_number == room_number:
+                    print("Room " + str(room_number) + " is not available")
+                    print("Here are the available rooms :")
+                    for room in self.rooms:
+                        if room.availability == 1:
+                            print(room)
+                    return 1
 
     def check_out(self, room_number, client):
         if client.room.room_number != room_number:
@@ -142,7 +156,6 @@ class Hotel:
                     print("Room availability: Not available")
                 if room.client != None:
                     print("Room client name: " + room.client.name)
-                
 
     def search_client(self, cin):
         for client in self.clients:
@@ -200,6 +213,18 @@ class Hotel:
 
             print("----------------------------")
 
+    def check_room_availability(self, room_number):
+        for room in self.rooms:
+            if room.room_number == room_number:
+                if room.availability == 1:
+                    print("Room available")
+                    print("Room price: " + str(room.price))
+                else:
+                    print("Room not available but will be available on " +
+                          str(room.client.to_date.strftime("%d-%m-%Y")))
+                return
+        print("Room not found")
+
     def availability(self):
         if self.capacity == 0:
             return False
@@ -223,15 +248,15 @@ class Hotel:
 
     def get_rooms(self):
         return self.rooms
-    
+
     def set_rooms(self, rooms):
         self.rooms = rooms
-    
+
     def get_clients(self):
         return self.clients
-    
+
     def set_clients(self, clients):
         self.clients = clients
-        
+
     def bill_amount(self, client):
         return client.room.price * client.get_duration().days
