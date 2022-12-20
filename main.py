@@ -24,22 +24,23 @@ print("Hotel created")
 print ("Initializing rooms...")
 hotel.add_rooms(2, 0, 1500)
 hotel.add_rooms(2, 1, 500)
-# hotel.add_rooms(2, 1, 3000)
-# hotel.delete_room(0)
-# hotel.get_room_info(1)
-# today = datetime.today()
-# tomorrow = today + timedelta(days=2)
-# c1 = Client("tester", "07242209", "tunis", "24367878",
-#             today, tomorrow, hotel.rooms[0])
-# print("Adding test client...")
-# hotel.check_in(0, c1)
-
 
 def check_availability():
     clear_screen()
     print("Check availability")
-    print("Occupancy: " + str(hotel.get_occupancy()) + "/" + str(hotel.capacity))
-
+    while True:
+        try:
+            room_number = input("Enter room number: ")
+            if room_number.isdigit() == False:
+                raise ValueError
+            else:
+                room_number = int(room_number)
+                if (room_number > hotel.get_last_roomnumber() or room_number < hotel.get_first_roomnumber()):
+                    raise ValueError
+                break
+        except ValueError:
+            print("Invalid room number. Please enter a valid room number.")
+    hotel.check_room_availability(room_number)
 
 def check_in():
     clear_screen()
@@ -157,35 +158,41 @@ def check_out():
         return
     while True:
         try:
-            cin = input("Enter client cin: ")
-            if cin.isdigit() == False or len(cin) != 8:
+            room_number = input("Enter room number: ")
+            if room_number.isdigit() == False:
                 raise ValueError
             else:
+                room_number = int(room_number)
+                if (room_number > hotel.get_last_roomnumber() or room_number < hotel.get_first_roomnumber()):
+                    raise ValueError
+                if hotel.get_room_by_number(room_number) == None:
+                    raise ValueError
+                if hotel.get_room_by_number(room_number).client == None:
+                    raise ValueError     
                 break
         except ValueError:
-            print("Invalid cin. Please enter a valid cin.")
-    c1 = hotel.select_client(cin)
-    if c1 == None:
-        print("Client not found.")
-        return
-    else:
-        while True:
-            try:
-                room_number = input("Enter room number: ")
-                if room_number.isdigit() == False:
-                    raise ValueError
-                else:
-                    room_number = int(room_number)
-                    if (room_number > hotel.capacity-1 or room_number < 0):
-                        raise ValueError
+            print("Invalid room number. Please enter a valid room number.")
+
+    c1 = hotel.get_room_by_number(room_number).client
+    print("Client name:", c1.name)
+    print("Bill amount is:", hotel.bill_amount(c1),
+            "TND", "(", c1.room.price, "TND/day )")
+    print ("Client Stayed",c1.get_duration().days,"days","in room",c1.room.room_number)
+    while True:
+        try:
+            choice = input("Do you want to pay the bill? (Y/N): ")
+            if choice != "Y" and choice != "N" and choice != "y" and choice != "n":
+                raise ValueError
+            else:
+                if choice == "Y" or choice == "y":
+                    print("Bill paid")
+                    hotel.check_out(room_number, c1)
                     break
-            except ValueError:
-                print("Invalid room number. Please enter a valid room number.")
-        print("bill amount is:", hotel.bill_amount(c1),
-              "TND", "(", c1.room.price, "TND/day )")
-        input("Press enter to pay bill...")
-        print("Bill paid")
-        hotel.check_out(room_number, c1)
+                elif choice == "N" or choice == "n":
+                    print("Check out cancelled")
+                    return
+        except ValueError:
+            print("Invalid choice. Please enter Y or N.")
 
 
 def search_client():
@@ -409,13 +416,24 @@ def pay_bill():
     else:
         print("Client", c1.name, "satyed",
               str(c1.get_duration().days), "days", "in room", c1.room.room_number)
-        print("bill amount is:", hotel.bill_amount(c1),
+        print("Bill amount is:", hotel.bill_amount(c1),
               "TND", "(", c1.room.price, "TND/day )")
-        input("Press enter to pay bill...")
-        print("Bill paid")
-        hotel.check_out(c1.room.room_number, c1)
-
-
+        while True:
+            try:
+                choice = input("Do you want to pay the bill? (Y/N): ")
+                if choice != "Y" and choice != "N" and choice != "y" and choice != "n":
+                    raise ValueError
+                else:
+                    if choice == "Y" or choice == "y":
+                        print("Bill paid")
+                        hotel.check_out(c1.room.room_number, c1)
+                        break
+                    elif choice == "N" or choice == "n":
+                        print("Check out cancelled")
+                        return
+            except ValueError:
+                print("Invalid choice. Please enter Y or N.")
+        
 def add_client():
     print("Add client")
     while True:
