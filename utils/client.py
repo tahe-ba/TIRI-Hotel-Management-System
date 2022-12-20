@@ -68,6 +68,6 @@ class Client:
         return self.name, self.cin, self.address, self.phone, self.from_date, self.to_date
 
     def __str__(self):
-        return "Name: " + self.name + " CIN: " + self.cin + " Address: " + self.address + " Phone: " + str(self.phone) + " From date: " + self.from_date + " To date: " + self.to_date
+        return "Name: " + self.name + " CIN: " + self.cin + " Address: " + self.address + " Phone: " + str(self.phone) + " From date: " + str(self.from_date) + " To date: " + str(self.to_date)
 
         

@@ -44,14 +44,14 @@ class Hotel:
         self.capacity += 1
 
     def delete_room(self, room_number):
+        if self.get_room_by_number(room_number).client != None:
+            print("Some clients are in this room")
+            return
         for room in self.rooms:
             if room.room_number == room_number:
-                if room.availability == 0:
-                    print("Some clients are in this room")
-                    return
                 self.rooms.remove(room)
                 self.capacity -= 1
-                print("Room deleted")
+                print("Room number "+str(room_number)+" deleted")
                 return
 
     def get_hotel_info(self):
@@ -104,10 +104,11 @@ class Hotel:
                     room.availability = 0
                     client.room = room
                     room.client = client
-                    self.clients.append(client)
+                    if client not in self.clients:
+                        self.clients.append(client)
                     print("Checked in " + str(client.cin) +
                           " to room " + str(room.room_number))
-                    return 0
+                    return
             else:
                 if room.room_number == room_number:
                     print("Room " + str(room_number) + " is not available")
@@ -115,22 +116,25 @@ class Hotel:
                     for room in self.rooms:
                         if room.availability == 1:
                             print(room)
-                    return 1
+                    return
 
     def check_out(self, room_number, client):
+        if client.room == None:
+            print("Client " + str(client.cin) + " is not in a room")
+            return
         if client.room.room_number != room_number:
             print("Room " + str(room_number) +
                   " is not assigned to client " + str(client.cin)+"\nThis client is in the room "+str(client.room.room_number))
             return
         for room in self.rooms:
             if room.room_number == room_number:
+                self.clients.remove(self.select_client(client.cin))
                 room.availability = 1
                 room.client = None
-                self.clients.remove(client)
                 print("check out " + str(client.cin) +
                       " from room " + str(room.room_number))
                 return
-        print("Room " + str(room_number) + " is not available")
+        print("Room " + str(room_number) + " checkout failed")
 
     def get_occupancy(self):
         occupancy = 0
@@ -182,7 +186,7 @@ class Hotel:
         if self.select_client(client.cin) != None:
             print("Client already exists")
             return
-        print("Client added but not checked in")
+        print("Client "+str(client.name)+" added but not checked in")
         self.clients.append(client)
 
     def delete_client(self, cin):
