@@ -5,6 +5,8 @@ import os
 from utils.hotel import Hotel
 from utils.client import Client
 
+
+# Global variables
 hotel_name = "TIRI"
 
 
@@ -16,14 +18,52 @@ def clear_screen():
     print("Welcome to " + hotel_name + " Management System")
 
 
-clear_screen()
 hotel = Hotel(hotel_name)
+clear_screen()
 print("Hotel created")
+input("Press enter to continue...")
 
-# hardcode rooms and client for testing
-print ("Initializing rooms...")
-hotel.add_rooms(2, 0, 1500)
-hotel.add_rooms(2, 1, 500)
+
+def dev_init():
+    clear_screen()
+    print("Initializing rooms...")
+    hotel.add_rooms(2, 0, 1500)
+    hotel.add_rooms(2, 1, 500)
+    hotel.add_room(0, 1500)
+    hotel.delete_room(1)
+    print("Rooms initialized\n")
+    print("Initializing clients...")
+    c_dev = Client("tester", "12345678", "tunis", "12345678",
+                   datetime.now(), datetime.now() + timedelta(days=1))
+    c_dev2 = Client("tester2", "12345679", "tunis", "12345679",
+                    datetime.now(), datetime.now() + timedelta(days=1))
+    c_dev3 = Client("tester3", "12345670", "tunis", "12345670",
+                    datetime.now(), datetime.now() + timedelta(days=1))
+
+    hotel.add_client(c_dev)
+    print("Clients initialized\n")
+
+    print("Checking in client...")
+    hotel.check_in(2, c_dev)
+    hotel.check_in(3, c_dev2)
+    print("Checking in client done\n")
+
+    print("Checking out client...")
+    hotel.check_out(2, c_dev)
+    hotel.check_out(3, c_dev2)
+    print("Checking out client done\n")
+
+    print("Initializing done\n")
+
+    input("Press enter to continue...")
+    clear_screen()
+
+    print("Hotel info:")
+    hotel.get_hotel_info()
+
+    input("Press enter to continue...")
+    clear_screen()
+
 
 def check_availability():
     clear_screen()
@@ -41,6 +81,7 @@ def check_availability():
         except ValueError:
             print("Invalid room number. Please enter a valid room number.")
     hotel.check_room_availability(room_number)
+
 
 def check_in():
     clear_screen()
@@ -82,7 +123,7 @@ def check_in():
                                         room_number = int(room_number)
                                         if (room_number > hotel.get_last_roomnumber() or room_number < hotel.get_first_roomnumber()):
                                             raise ValueError
-                                        if hotel.rooms[room_number].availability == False:
+                                        if hotel.get_room_by_number(room_number).availability == False:
                                             raise ValueError
                                         break
                                 except ValueError:
@@ -142,7 +183,7 @@ def check_in():
                     room_number = int(room_number)
                     if (room_number > hotel.get_last_roomnumber() or room_number < hotel.get_first_roomnumber()):
                         raise ValueError
-                    if hotel.rooms[room_number].availability == False:
+                    if hotel.get_room_by_number(room_number).availability == False:
                         raise ValueError
                     break
             except ValueError:
@@ -168,7 +209,7 @@ def check_out():
                 if hotel.get_room_by_number(room_number) == None:
                     raise ValueError
                 if hotel.get_room_by_number(room_number).client == None:
-                    raise ValueError     
+                    raise ValueError
                 break
         except ValueError:
             print("Invalid room number. Please enter a valid room number.")
@@ -176,8 +217,9 @@ def check_out():
     c1 = hotel.get_room_by_number(room_number).client
     print("Client name:", c1.name)
     print("Bill amount is:", hotel.bill_amount(c1),
-            "TND", "(", c1.room.price, "TND/day )")
-    print ("Client Stayed",c1.get_duration().days,"days","in room",c1.room.room_number)
+          "TND", "(", c1.room.price, "TND/day )")
+    print("Client Stayed", c1.get_duration().days,
+          "days", "in room", c1.room.room_number)
     while True:
         try:
             choice = input("Do you want to pay the bill? (Y/N): ")
@@ -239,7 +281,6 @@ def search_room():
                 break
         except ValueError:
             print("Invalid room number. Please enter a valid room number.")
-
 
 
 def hotel_info():
@@ -433,7 +474,8 @@ def pay_bill():
                         return
             except ValueError:
                 print("Invalid choice. Please enter Y or N.")
-        
+
+
 def add_client():
     print("Add client")
     while True:
@@ -499,7 +541,7 @@ def add_client():
                     room_number = int(room_number)
                     if (room_number > hotel.get_last_roomnumber() or room_number < hotel.get_first_roomnumber()):
                         raise ValueError
-                    if hotel.rooms[room_number].availability == False:
+                    if hotel.get_room_by_number(room_number).availability == False:
                         raise ValueError
                     hotel.check_in(room_number, Client(
                         name, cin, address, phone, check_in_date, check_out_date))
@@ -533,6 +575,7 @@ def client_management():
 
 
 def main():
+    # dev_init()
     while True:
         choice = main_menu()
         if choice == "1":
